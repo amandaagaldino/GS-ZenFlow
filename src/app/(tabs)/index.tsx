@@ -13,6 +13,7 @@ import { StatusBar } from 'expo-status-bar';
 import theme from '@/src/constants/theme';
 import { createRegistro } from '@/src/api/registros';
 import LevelButton from '@/src/components/LevelButton';
+import Header from '@/src/components/Header';
 
 export default function Home() {
   const [nivelEstresse, setNivelEstresse] = useState<number | null>(null);
@@ -51,10 +52,11 @@ export default function Home() {
 
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar style="dark" />
-      
-      <View style={styles.content}>
+      <Header logoutRoute="/login" />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.content}>
         <Text style={styles.greeting}>Olá, como você está hoje?</Text>
 
         <View style={styles.levelsContainer}>
@@ -97,8 +99,9 @@ export default function Home() {
             <Text style={styles.registerButtonText}>Registrar</Text>
           )}
         </TouchableOpacity>
-      </View>
-    </ScrollView>
+        </View>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -106,6 +109,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   content: {
     padding: theme.spacing.large,

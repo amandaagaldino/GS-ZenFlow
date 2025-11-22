@@ -15,6 +15,7 @@ import { getEstatisticas } from '@/src/api/registros';
 import { Registro } from '@/src/types/registro';
 import StatCard from '@/src/components/StatCard';
 import { getEmojiForLevel } from '@/src/utils/estresse';
+import Header from '@/src/components/Header';
 
 export default function Gestor() {
   const [registros, setRegistros] = useState<Registro[]>([]);
@@ -96,18 +97,19 @@ export default function Gestor() {
   }
 
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-    >
+    <View style={styles.container}>
       <StatusBar style="dark" />
-      
-      <View style={styles.header}>
-        <Ionicons name="stats-chart" size={32} color={theme.colors.primary} />
-        <Text style={styles.headerTitle}>Painel do Gestor</Text>
-      </View>
+      <Header logoutRoute="/manager-login" />
+      <ScrollView
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <View style={styles.header}>
+          <Ionicons name="stats-chart" size={32} color={theme.colors.primary} />
+          <Text style={styles.headerTitle}>Painel do Gestor</Text>
+        </View>
 
       <View style={styles.statsContainer}>
         <StatCard
@@ -153,7 +155,8 @@ export default function Gestor() {
           Estatísticas atualizadas em tempo real. Puxe para baixo para atualizar.
         </Text>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
@@ -161,6 +164,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   loadingContainer: {
     flex: 1,
