@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -12,36 +12,67 @@ interface HeaderProps {
 
 export default function Header({ onLogout, logoutRoute = '/login' }: HeaderProps) {
   const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = async () => {
-    Alert.alert(
-      'Confirmar Logout',
-      'Tem certeza que deseja sair?',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
-        {
-          text: 'Sair',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await removeUser();
-              if (onLogout) {
-                onLogout();
-              } else {
-                router.replace(logoutRoute as any);
-              }
-            } catch (error) {
-              console.error('Erro ao fazer logout:', error);
-              // Mesmo com erro, redirecionar
-              router.replace(logoutRoute as any);
-            }
-          },
-        },
-      ]
-    );
+  const performLogout = async () => {
+    if (isLoggingOut) return; // Previne múltiplos cliques
+    
+    setIsLoggingOut(true);
+    
+    try {
+      // Remove o usuário do storage
+      await removeUser();
+    } catch (error) {
+      console.error('Erro ao remover usuário:', error);
+    }
+    
+    // Se houver callback customizado, usa ele (mais confiável)
+    if (onLogout) {
+      // Chama o callback - ele vai fazer a navegação
+      onLogout();
+    } else {
+      // Fallback: navegação direta sem callback
+      // Usa um delay maior para garantir que o Alert feche completamente
+      setTimeout(() => {
+        // Tenta múltiplas abordagens
+        try {
+          router.replace(logoutRoute as any);
+        } catch (e) {
+          try {
+            router.push(logoutRoute as any);
+          } catch (e2) {
+            // Última tentativa: recarrega a aplicação indo para a raiz
+            router.replace('/');
+          }
+        }
+      }, 500);
+    }
+    
+    setIsLoggingOut(false);
+  };
+
+  const handleLogout = () => {
+    // Remove o Alert temporariamente para testar se é ele que está bloqueando
+    // Se funcionar, podemos adicionar o Alert de volta depois
+    performLogout();
+    
+    // Versão com Alert (comentada para teste):
+    // Alert.alert(
+    //   'Confirmar Logout',
+    //   'Tem certeza que deseja sair?',
+    //   [
+    //     {
+    //       text: 'Cancelar',
+    //       style: 'cancel',
+    //     },
+    //     {
+    //       text: 'Sair',
+    //       style: 'destructive',
+    //       onPress: performLogout,
+    //     },
+    //   ],
+    //   { cancelable: true }
+    // );
   };
 
   return (

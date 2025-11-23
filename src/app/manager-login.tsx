@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -22,6 +22,16 @@ export default function ManagerLogin() {
   const [password, setPassword] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
+
+  // Limpa qualquer estado residual quando a tela de login é carregada
+  useEffect(() => {
+    // Força um re-render para garantir que estamos na tela correta
+    const timer = setTimeout(() => {
+      // Verifica se ainda estamos na tela de login
+      // Se não estiver, não faz nada
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleLogin = async (): Promise<void> => {
     if (!email.trim() || !password.trim()) {

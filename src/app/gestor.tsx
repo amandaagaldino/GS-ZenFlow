@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import theme from '@/src/constants/theme';
 import { getEstatisticas } from '@/src/api/registros';
@@ -24,6 +24,19 @@ export default function Gestor() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const router = useRouter();
+
+  // Verifica autenticação sempre que a tela recebe foco
+  useFocusEffect(
+    useCallback(() => {
+      const checkAuth = async () => {
+        const usuario = await getUser();
+        if (!usuario || !usuario.isGestor) {
+          router.replace('/manager-login');
+        }
+      };
+      checkAuth();
+    }, [router])
+  );
 
   useEffect(() => {
     checkUserAndLoad();
@@ -124,10 +137,19 @@ export default function Gestor() {
     );
   }
 
+  const handleLogout = () => {
+    // Navega diretamente - o Header já removeu o usuário do storage
+    // Usa um delay para garantir que o Alert feche
+    setTimeout(() => {
+      // Tenta navegar para a tela de login do gestor
+      router.replace('/manager-login');
+    }, 100);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <Header logoutRoute="/manager-login" />
+      <Header onLogout={handleLogout} />
       <ScrollView
         style={styles.scrollView}
         refreshControl={

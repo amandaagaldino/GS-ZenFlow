@@ -10,12 +10,13 @@ import {
   ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import theme from '@/src/constants/theme';
 import { createRegistro } from '@/src/api/registros';
 import { getUserId } from '@/src/utils/storage';
 import LevelButton from '@/src/components/LevelButton';
 import Header from '@/src/components/Header';
+import { useCallback } from 'react';
 
 export default function Home() {
   const [nivelEstresse, setNivelEstresse] = useState<number | null>(null);
@@ -23,6 +24,21 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [usuarioId, setUsuarioId] = useState<number | null>(null);
   const router = useRouter();
+
+  // Verifica autenticação sempre que a tela recebe foco
+  useFocusEffect(
+    useCallback(() => {
+      const checkAuth = async () => {
+        const id = await getUserId();
+        if (!id) {
+          router.replace('/login');
+        } else {
+          setUsuarioId(id);
+        }
+      };
+      checkAuth();
+    }, [router])
+  );
 
   useEffect(() => {
     // Verificar se há usuário logado
@@ -81,10 +97,19 @@ export default function Home() {
   };
 
 
+  const handleLogout = () => {
+    // Navega diretamente - o Header já removeu o usuário do storage
+    // Usa um delay para garantir que o Alert feche
+    setTimeout(() => {
+      // Tenta navegar para a tela de login
+      router.replace('/login');
+    }, 100);
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar style="dark" />
-      <Header logoutRoute="/login" />
+      <Header onLogout={handleLogout} />
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
         <Text style={styles.greeting}>Olá, como você está hoje?</Text>
