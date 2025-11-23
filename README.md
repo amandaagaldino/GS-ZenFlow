@@ -188,6 +188,13 @@ O projeto implementa todas as operações CRUD (Create, Read, Update, Delete) us
 
 O ZenFlow foi desenvolvido com foco em privacidade e anonimato. Os registros são armazenados de forma segura e os gestores visualizam apenas dados agregados, preservando a identidade individual dos colaboradores.
 
+## Vídeo de demonstração
+
+Segue abaixo o link do vídeo apresentando o projeto e demonstrando o funcionamento do app: 
+
+> 🎬 Clique na imagem abaixo para assistir no YouTube
+
+[![Assista ao vídeo](./assets/capavideo.jpg)](https://youtu.be/DPHlj1m0nOo) 
 
 ## 👥 Autores
 
@@ -196,7 +203,3 @@ O ZenFlow foi desenvolvido com foco em privacidade e anonimato. Os registros sã
 | Amanda Galdino     | 560066 |
 | Bruno Cantacini    | 560242 |
 | Gustavo Gonçalves | 556823 |
-
----
-
-**Desenvolvido com ❤️ para melhorar o bem-estar no ambiente de trabalho**
