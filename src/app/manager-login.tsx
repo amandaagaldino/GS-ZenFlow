@@ -8,19 +8,52 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import theme from '@/src/constants/theme';
+import { login } from '@/src/api/usuarios';
+import { saveUser } from '@/src/utils/storage';
 
 export default function ManagerLogin() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const handleLogin = (): void => {
-    // Navegação para a tela do gestor
-    router.replace('/gestor');
+  const handleLogin = async (): Promise<void> => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Atenção', 'Por favor, preencha email e senha.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const usuario = await login({ email: email.trim(), senha: password });
+      
+      // Verificar se é gestor
+      if (!usuario.isGestor) {
+        Alert.alert('Atenção', 'Este usuário não é um gestor. Use o login de colaborador.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Salvar usuário no storage
+      await saveUser(usuario);
+      
+      // Navegar para a tela do gestor
+      router.replace('/gestor');
+    } catch (error: any) {
+      console.error('Erro ao fazer login:', error);
+      Alert.alert(
+        'Erro no Login',
+        error.message || 'Email ou senha incorretos. Tente novamente.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,11 +104,16 @@ export default function ManagerLogin() {
           </View>
 
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleLogin}
             activeOpacity={0.8}
+            disabled={isLoading}
           >
-            <Text style={styles.buttonText}>Entrar como Gerente</Text>
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Entrar como Gerente</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -169,6 +207,9 @@ const styles = StyleSheet.create({
     color: theme.colors.textLight,
     fontSize: theme.fonts.body,
     fontWeight: '500',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
 });
 

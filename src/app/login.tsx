@@ -8,19 +8,52 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import theme from '@/src/constants/theme';
+import { login } from '@/src/api/usuarios';
+import { saveUser } from '@/src/utils/storage';
 
 export default function Login() {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
 
-  const handleLogin = (): void => {
-    // Navegação para a tela de tabs (sem autenticação real por enquanto)
-    router.replace('/(tabs)');
+  const handleLogin = async (): Promise<void> => {
+    if (!email.trim() || !password.trim()) {
+      Alert.alert('Atenção', 'Por favor, preencha email e senha.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const usuario = await login({ email: email.trim(), senha: password });
+      
+      // Verificar se é gestor
+      if (usuario.isGestor) {
+        Alert.alert('Atenção', 'Este é um login de gestor. Use a opção "Login para Gerente".');
+        setIsLoading(false);
+        return;
+      }
+
+      // Salvar usuário no storage
+      await saveUser(usuario);
+      
+      // Navegar para a tela principal
+      router.replace('/(tabs)');
+    } catch (error: any) {
+      console.error('Erro ao fazer login:', error);
+      Alert.alert(
+        'Erro no Login',
+        error.message || 'Email ou senha incorretos. Tente novamente.'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -71,11 +104,16 @@ export default function Login() {
           </View>
 
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, isLoading && styles.buttonDisabled]}
             onPress={handleLogin}
             activeOpacity={0.8}
+            disabled={isLoading}
           >
-            <Text style={styles.buttonText}>Entrar</Text>
+            {isLoading ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.buttonText}>Entrar</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -171,6 +209,9 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     fontSize: theme.fonts.body,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
   },
 });
 
