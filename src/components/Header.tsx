@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import theme from '@/src/constants/theme';
+import { removeUser } from '@/src/utils/storage';
 
 interface HeaderProps {
   onLogout?: () => void;
@@ -12,12 +13,35 @@ interface HeaderProps {
 export default function Header({ onLogout, logoutRoute = '/login' }: HeaderProps) {
   const router = useRouter();
 
-  const handleLogout = () => {
-    if (onLogout) {
-      onLogout();
-    } else {
-      router.replace(logoutRoute as any);
-    }
+  const handleLogout = async () => {
+    Alert.alert(
+      'Confirmar Logout',
+      'Tem certeza que deseja sair?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await removeUser();
+              if (onLogout) {
+                onLogout();
+              } else {
+                router.replace(logoutRoute as any);
+              }
+            } catch (error) {
+              console.error('Erro ao fazer logout:', error);
+              // Mesmo com erro, redirecionar
+              router.replace(logoutRoute as any);
+            }
+          },
+        },
+      ]
+    );
   };
 
   return (

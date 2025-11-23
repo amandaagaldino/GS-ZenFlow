@@ -8,7 +8,7 @@ import { getEmojiForLevel } from '@/src/utils/estresse';
 interface RegistroItemProps {
   registro: Registro;
   onEdit: (registro: Registro) => void;
-  onDelete: (id: string) => void;
+  onDelete: (id: number) => void;
 }
 
 const formatDate = (dateString: string): string => {

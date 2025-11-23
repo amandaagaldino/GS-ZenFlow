@@ -9,9 +9,11 @@ import {
   Alert,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import theme from '@/src/constants/theme';
 import { getEstatisticas } from '@/src/api/registros';
+import { getUser } from '@/src/utils/storage';
 import { Registro } from '@/src/types/registro';
 import StatCard from '@/src/components/StatCard';
 import { getEmojiForLevel } from '@/src/utils/estresse';
@@ -21,19 +23,45 @@ export default function Gestor() {
   const [registros, setRegistros] = useState<Registro[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const router = useRouter();
 
   useEffect(() => {
-    loadEstatisticas();
+    checkUserAndLoad();
   }, []);
+
+  const checkUserAndLoad = async () => {
+    const usuario = await getUser();
+    if (!usuario) {
+      Alert.alert('Atenção', 'Você precisa fazer login para continuar.', [
+        {
+          text: 'OK',
+          onPress: () => router.replace('/manager-login'),
+        },
+      ]);
+      return;
+    }
+
+    if (!usuario.isGestor) {
+      Alert.alert('Acesso Negado', 'Você não tem permissão para acessar esta área.', [
+        {
+          text: 'OK',
+          onPress: () => router.replace('/login'),
+        },
+      ]);
+      return;
+    }
+
+    loadEstatisticas();
+  };
 
   const loadEstatisticas = async () => {
     setIsLoading(true);
     try {
       const result = await getEstatisticas();
       setRegistros(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar estatísticas:', error);
-      Alert.alert('Erro', 'Não foi possível carregar as estatísticas.');
+      Alert.alert('Erro', error.message || 'Não foi possível carregar as estatísticas.');
     } finally {
       setIsLoading(false);
     }
