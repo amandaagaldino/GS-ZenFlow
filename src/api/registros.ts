@@ -60,11 +60,15 @@ export async function getEstatisticas(): Promise<Registro[]> {
   return response.data;
 }
 
-// Função de compatibilidade para manter o código existente funcionando
-// NOTA: O backend não possui endpoint de atualização ainda
-// Esta função pode ser implementada quando o endpoint for criado
-export async function updateRegistro(id: number, data: NewRegistro): Promise<Registro> {
-  // Por enquanto, retorna erro informando que não está implementado
-  throw new Error("Atualização de registro não está disponível no backend ainda. Use delete e create.");
+/**
+ * Atualiza um registro de estresse existente
+ * @param id - ID do registro
+ * @param usuarioId - ID do usuário (para validação de permissão)
+ * @param data - { nivelEstresse: number, observacoes?: string }
+ * @returns Registro atualizado
+ */
+export async function updateRegistro(id: number, usuarioId: number, data: NewRegistro): Promise<Registro> {
+  const response = await apiClient.put<Registro>(`/Registro/${id}/usuario/${usuarioId}`, data);
+  return response.data;
 }
 
