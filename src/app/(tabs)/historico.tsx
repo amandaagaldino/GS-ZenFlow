@@ -9,9 +9,11 @@ import {
   RefreshControl,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import theme from '@/src/constants/theme';
-import { getRegistros, updateRegistro, deleteRegistro } from '@/src/api/registros';
+import { getRegistrosByUsuario, deleteRegistro } from '@/src/api/registros';
+import { getUserId } from '@/src/utils/storage';
 import { Registro } from '@/src/types/registro';
 import RegistroItem from '@/src/components/RegistroItem';
 
@@ -20,19 +22,43 @@ export default function Historico() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isPending, setIsPending] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    loadRegistros();
+    loadUserId();
   }, []);
 
+  useEffect(() => {
+    if (usuarioId) {
+      loadRegistros();
+    }
+  }, [usuarioId]);
+
+  const loadUserId = async () => {
+    const id = await getUserId();
+    if (!id) {
+      Alert.alert('Atenção', 'Você precisa fazer login para continuar.', [
+        {
+          text: 'OK',
+          onPress: () => router.replace('/login'),
+        },
+      ]);
+      return;
+    }
+    setUsuarioId(id);
+  };
+
   const loadRegistros = async () => {
+    if (!usuarioId) return;
+    
     setIsLoading(true);
     try {
-      const result = await getRegistros();
+      const result = await getRegistrosByUsuario(usuarioId);
       setRegistros(result);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao carregar registros:', error);
-      Alert.alert('Erro', 'Não foi possível carregar os registros.');
+      Alert.alert('Erro', error.message || 'Não foi possível carregar os registros.');
     } finally {
       setIsLoading(false);
     }
@@ -46,63 +72,21 @@ export default function Historico() {
 
   const handleEdit = (item: Registro) => {
     Alert.alert(
-      'Editar Nível de Estresse',
-      'Selecione o novo nível:',
+      'Editar Registro',
+      'A funcionalidade de edição ainda não está disponível no backend. Você pode excluir este registro e criar um novo.',
       [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Nível 1',
-          onPress: async () => {
-            await updateRegistroItem(item, 1);
-          },
-        },
-        {
-          text: 'Nível 2',
-          onPress: async () => {
-            await updateRegistroItem(item, 2);
-          },
-        },
-        {
-          text: 'Nível 3',
-          onPress: async () => {
-            await updateRegistroItem(item, 3);
-          },
-        },
-        {
-          text: 'Nível 4',
-          onPress: async () => {
-            await updateRegistroItem(item, 4);
-          },
-        },
-        {
-          text: 'Nível 5',
-          onPress: async () => {
-            await updateRegistroItem(item, 5);
-          },
-        },
+        { text: 'OK', style: 'default' },
       ],
       { cancelable: true }
     );
   };
 
-  const updateRegistroItem = async (item: Registro, novoNivel: number) => {
-    setIsPending(true);
-    try {
-      await updateRegistro(item.id, {
-        nivelEstresse: novoNivel,
-        observacoes: item.observacoes,
-      });
-      await loadRegistros();
-      Alert.alert('Sucesso', 'Registro atualizado!');
-    } catch (error) {
-      console.error('Erro ao atualizar:', error);
-      Alert.alert('Erro', 'Não foi possível atualizar o registro.');
-    } finally {
-      setIsPending(false);
+  const handleDelete = (id: number) => {
+    if (!usuarioId) {
+      Alert.alert('Erro', 'Usuário não identificado.');
+      return;
     }
-  };
 
-  const handleDelete = (id: string) => {
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este registro?',
@@ -117,12 +101,12 @@ export default function Historico() {
           onPress: async () => {
             setIsPending(true);
             try {
-              await deleteRegistro(id);
+              await deleteRegistro(id, usuarioId);
               await loadRegistros();
               Alert.alert('Sucesso', 'Registro excluído!');
-            } catch (error) {
+            } catch (error: any) {
               console.error('Erro ao excluir:', error);
-              Alert.alert('Erro', 'Não foi possível excluir o registro.');
+              Alert.alert('Erro', error.message || 'Não foi possível excluir o registro.');
             } finally {
               setIsPending(false);
             }
@@ -151,7 +135,7 @@ export default function Historico() {
       )}
       <FlatList
         data={registros}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <RegistroItem
             registro={item}

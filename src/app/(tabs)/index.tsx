@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,8 +10,10 @@ import {
   ScrollView,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { useRouter } from 'expo-router';
 import theme from '@/src/constants/theme';
 import { createRegistro } from '@/src/api/registros';
+import { getUserId } from '@/src/utils/storage';
 import LevelButton from '@/src/components/LevelButton';
 import Header from '@/src/components/Header';
 
@@ -19,6 +21,28 @@ export default function Home() {
   const [nivelEstresse, setNivelEstresse] = useState<number | null>(null);
   const [observacoes, setObservacoes] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [usuarioId, setUsuarioId] = useState<number | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Verificar se há usuário logado
+    loadUserId();
+  }, []);
+
+  const loadUserId = async () => {
+    const id = await getUserId();
+    if (!id) {
+      // Se não houver usuário logado, redirecionar para login
+      Alert.alert('Atenção', 'Você precisa fazer login para continuar.', [
+        {
+          text: 'OK',
+          onPress: () => router.replace('/login'),
+        },
+      ]);
+      return;
+    }
+    setUsuarioId(id);
+  };
 
   const handleRegistrar = async () => {
     if (nivelEstresse === null) {
@@ -26,9 +50,15 @@ export default function Home() {
       return;
     }
 
+    if (!usuarioId) {
+      Alert.alert('Erro', 'Usuário não identificado. Faça login novamente.');
+      router.replace('/login');
+      return;
+    }
+
     setIsLoading(true);
     try {
-      await createRegistro({
+      await createRegistro(usuarioId, {
         nivelEstresse,
         observacoes: observacoes.trim() || undefined,
       });
@@ -42,9 +72,9 @@ export default function Home() {
           },
         },
       ]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erro ao registrar:', error);
-      Alert.alert('Erro', 'Não foi possível salvar o registro. Tente novamente.');
+      Alert.alert('Erro', error.message || 'Não foi possível salvar o registro. Tente novamente.');
     } finally {
       setIsLoading(false);
     }
