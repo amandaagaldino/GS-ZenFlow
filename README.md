@@ -8,6 +8,31 @@ O futuro do trabalho impõe grande pressão sobre a saúde mental dos colaborado
 
 O ZenFlow é uma plataforma que usa tecnologia para monitorar o bem-estar coletivo da organização. Fornece dados empáticos para a gestão tomar decisões baseadas em evidências, criando um ambiente de trabalho mais inclusivo e sustentável.
 
+A solução ZenFlow está diretamente alinhada com os Objetivos de Desenvolvimento Sustentável (ODS) da ONU, especialmente:
+
+#### 🎯 ODS 8: Trabalho Decente e Crescimento Econômico
+
+Ao focar no bem-estar e na saúde mental, a solução contribui para a promoção de ambientes de trabalho seguros e saudáveis, garantindo um trabalho digno para todos. O monitoramento contínuo do estresse permite que as organizações identifiquem e resolvam problemas antes que impactem significativamente a qualidade de vida dos colaboradores.
+
+#### 📚 ODS 4: Educação de Qualidade
+
+A partir dos dados coletados, a empresa pode identificar tendências e investir em programas de capacitação e workshops focados em gestão de estresse e inteligência emocional, promovendo o aprendizado ao longo da vida. O ZenFlow fornece insights valiosos que orientam o desenvolvimento de programas educacionais personalizados.
+
+#### ⚖️ ODS 10: Redução das Desigualdades
+
+O anonimato garante que todos os colaboradores, independentemente do cargo ou vulnerabilidade, possam expressar suas preocupações de forma segura, criando um sistema de apoio mais inclusivo. Isso elimina barreiras hierárquicas e promove equidade no acesso a recursos de bem-estar.
+
+## 📖 Sobre o Projeto
+
+O ZenFlow é composto por duas aplicações complementares:
+
+1. **API REST (gs-ZenFlow)**: Fornece endpoints RESTful para integração com outros sistemas, com documentação Swagger completa e tratamento padronizado de erros.
+
+2. **Aplicação Web MVC (Web-gs-ZenFlow)**: Interface web amigável para gerenciamento de usuários e registros de estresse, utilizando Razor Pages e Bootstrap.
+
+Ambas as aplicações compartilham a mesma arquitetura em camadas, banco de dados Oracle e lógica de negócio, garantindo consistência e reutilização de código.
+
+---
 ## 📱 Funcionalidades
 
 ### Para Colaboradores
