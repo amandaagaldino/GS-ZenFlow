@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Ionicons } from '@expo/vector-icons';
 import theme from '@/src/constants/theme';
 import { login } from '@/src/api/usuarios';
 import { saveUser } from '@/src/utils/storage';
@@ -122,7 +123,10 @@ export default function ManagerLogin() {
             {isLoading ? (
               <ActivityIndicator color="#FFFFFF" />
             ) : (
-              <Text style={styles.buttonText}>Entrar como Gerente</Text>
+              <View style={styles.buttonContent}>
+                <Ionicons name="shield-checkmark" size={22} color="#FFFFFF" style={styles.buttonIcon} />
+                <Text style={styles.buttonText}>Entrar como Gerente</Text>
+              </View>
             )}
           </TouchableOpacity>
 
@@ -185,7 +189,7 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
   },
   button: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: '#D4AF37', // Cor dourada para gerente
     borderRadius: 8,
     paddingVertical: theme.spacing.medium,
     alignItems: 'center',
@@ -199,6 +203,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 5,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonIcon: {
+    marginRight: theme.spacing.small,
   },
   buttonText: {
     color: '#FFFFFF',
